@@ -1,20 +1,16 @@
 const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwCneAjxWxMZYLM9uyAUMGe4OQXVx2eO8VIjfndLZL7_UTagxaD_NKZqNXkcfn9mXHX/exec'; 
 
 async function kirimData() {
-    // 💡 PERBAIKAN: Deklarasikan variabel DOM di sini
     const inputElement = document.getElementById('inputAngka');
     const hasilElement = document.getElementById('hasilCek');
     
-    // Pastikan elemen ditemukan sebelum digunakan
     if (!inputElement || !hasilElement) {
         console.error("Error: Elemen HTML tidak ditemukan (id: inputAngka atau hasilCek)");
-        // 
         return; 
     }
     
     const angka = inputElement.value;
     
-    // Validasi input
     if (!angka) {
         hasilElement.textContent = "Mohon masukkan angka.";
         return;
@@ -22,15 +18,16 @@ async function kirimData() {
 
     hasilElement.textContent = "Sedang memproses...";
     
-    // SOLUSI CORS: Menggunakan URLSearchParams
-    const params = new URLSearchParams();
-    params.append('angka', angka);
+    // 💡 SOLUSI TERBAIK: Menggunakan Objek FormData
+    const formData = new FormData();
+    formData.append('angka', angka); // Kunci 'angka' harus sama dengan yang diakses di GAS
     
     try {
         const response = await fetch(GAS_ENDPOINT, {
             method: 'POST',
             mode: 'cors', 
-            body: params.toString(), 
+            // TIDAK PERLU Header 'Content-Type'. fetch akan mengaturnya secara otomatis.
+            body: formData, // Langsung kirim objek FormData
         });
 
         if (!response.ok) {
