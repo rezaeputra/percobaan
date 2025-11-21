@@ -8,6 +8,7 @@ async function kirimData() {
     // Pastikan elemen ditemukan sebelum digunakan
     if (!inputElement || !hasilElement) {
         console.error("Error: Elemen HTML tidak ditemukan (id: inputAngka atau hasilCek)");
+        // 
         return; 
     }
     
