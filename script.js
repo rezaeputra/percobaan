@@ -1,35 +1,54 @@
-// Ganti dengan Web app URL GAS Anda!
 const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwCneAjxWxMZYLM9uyAUMGe4OQXVx2eO8VIjfndLZL7_UTagxaD_NKZqNXkcfn9mXHX/exec'; 
 
 async function kirimData() {
-    // ... (kode validasi input tetap sama) ...
-
+    // 💡 PERBAIKAN: Deklarasikan variabel DOM di sini
+    const inputElement = document.getElementById('inputAngka');
+    const hasilElement = document.getElementById('hasilCek');
+    
+    // Pastikan elemen ditemukan sebelum digunakan
+    if (!inputElement || !hasilElement) {
+        console.error("Error: Elemen HTML tidak ditemukan (id: inputAngka atau hasilCek)");
+        return; 
+    }
+    
     const angka = inputElement.value;
     
-    // 💡 SOLUSI CORS: Menggunakan URLSearchParams untuk mengirim data
-    // Ini mengubah format body menjadi application/x-www-form-urlencoded
+    // Validasi input
+    if (!angka) {
+        hasilElement.textContent = "Mohon masukkan angka.";
+        return;
+    }
+
+    hasilElement.textContent = "Sedang memproses...";
+    
+    // SOLUSI CORS: Menggunakan URLSearchParams
     const params = new URLSearchParams();
     params.append('angka', angka);
     
-    // Perhatikan: Kita TIDAK mengirim header 'Content-Type': 'application/json' lagi!
-
     try {
         const response = await fetch(GAS_ENDPOINT, {
             method: 'POST',
             mode: 'cors', 
-            // Hapus bagian headers: { 'Content-Type': 'application/json' },
-            body: params.toString(), // Kirim data dalam format string URL-encoded
+            body: params.toString(), 
         });
 
-        // ... (kode penanganan response JSON tetap sama) ...
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
         
-        // Catatan: Karena kita tidak mengirim JSON, kita harus mengubah cara GAS menerima data.
-        const data = await response.json(); 
-        
-        // ... (lanjutan penanganan respons) ...
+        // Penanganan respons dari GAS
+        if (data.status === 'TERCATAT') {
+            hasilElement.textContent = `✅ SUDAH TERCATAT: ${data.message}`;
+        } else if (data.status === 'DICATAT_BARU') {
+            hasilElement.textContent = `💾 BERHASIL DICATAT: ${data.message}`;
+        } else {
+            hasilElement.textContent = `⚠️ RESPON TAK DIKENAL: ${data.message}`;
+        }
 
     } catch (error) {
-        // ... (penanganan error) ...
+        console.error('Terjadi kesalahan:', error);
+        hasilElement.textContent = `❌ Terjadi kesalahan saat berkomunikasi dengan server. Cek konsol.`;
     }
 }
-
